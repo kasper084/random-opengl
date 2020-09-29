@@ -1,21 +1,25 @@
 package some;
 
-import org.lwjgl.*;
 import org.lwjgl.glfw.*;
 import org.lwjgl.opengl.*;
 import org.lwjgl.system.*;
+import some.render.Loader;
+import some.render.Mesh;
 
 import java.nio.*;
 
 import static org.lwjgl.glfw.Callbacks.*;
 import static org.lwjgl.glfw.GLFW.*;
 import static org.lwjgl.opengl.GL11.*;
+import static org.lwjgl.opengl.GL20.glDisableVertexAttribArray;
+import static org.lwjgl.opengl.GL20.glEnableVertexAttribArray;
+import static org.lwjgl.opengl.GL30C.glBindVertexArray;
 import static org.lwjgl.system.MemoryStack.*;
 import static org.lwjgl.system.MemoryUtil.*;
 
 public class Window {
 
-    private static final String TITLE = "lwjgl_test";
+    private static final String TITLE = "window";
 
     private static final int WIDTH = 400;
     private static final int HEIGHT = 600;
@@ -75,13 +79,27 @@ public class Window {
     }
 
     public void loop() {
+        float[] vertices = {0.5f, -0.5f, 0f,
+                -0.5f, 0.5f, 0f,
+                0f, 0.5f, 0f,};
+        int[] indices = {0, 1, 2};
+
         GL.createCapabilities();
 
-        //mix of RGB in float values
-        glClearColor(0.9f, 0.9f, 0.3f, 0.0f); //lite-yellow
+        //mix of RGB in float values from 0.0 to 1.0
+        glClearColor(0.9f, 0.9f, 0.8f, 0.0f); //lite-grey
 
         while (!glfwWindowShouldClose(window)) {
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+            Mesh mesh = Loader.createMesh(vertices, indices);
+
+            glBindVertexArray(mesh.getVaoID());
+            glEnableVertexAttribArray(0);
+            glDrawElements(GL_TRIANGLES, mesh.getVerticesCount(), GL_UNSIGNED_INT,0);
+            glDisableVertexAttribArray(0);
+            glBindVertexArray(0);
+
             glfwSwapBuffers(window);
             glfwPollEvents();
         }
